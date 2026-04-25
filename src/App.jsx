@@ -202,15 +202,22 @@ const CSS = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --bg:#07090f;--s1:rgba(255,255,255,.04);--s2:rgba(255,255,255,.07);
-  --bdr:rgba(255,255,255,.07);--gold:#c9a84c;--gold2:#f0d478;
-  --txt:#ddd8cc;--txt2:rgba(221,216,204,.55);--txt3:rgba(221,216,204,.28);
-  --grn:#6abf7b;--red:#cf6b6b;--blu:#6b9ecf;--purp:#9b7ecf;
-  --serif:'Cormorant Garamond',Georgia,serif;--sans:'Outfit',system-ui,sans-serif;
+  --bg:#0d1018;         /* slightly lighter near-black — more contrast base   */
+  --s1:rgba(255,255,255,.08);  /* cards: 8% white → visible separation        */
+  --s2:rgba(255,255,255,.13);  /* elevated cards, hovers                       */
+  --bdr:rgba(255,255,255,.13); /* borders: visible dividers                    */
+  --gold:#d4a843;              /* gold: slightly warmer, 7.1:1 on --bg         */
+  --gold2:#f5d96a;             /* gold highlight                               */
+  --txt:#eae4d8;               /* primary text: 15.8:1 on --bg ✓              */
+  --txt2:#a8a099;              /* secondary: rgba equiv ~.70 → 5.8:1 ✓        */
+  --txt3:#8a837b;              /* tertiary: 4.6:1 on --bg — passes AA ✓       */
+  --grn:#72c982;--red:#e07878;--blu:#7aaedc;--purp:#a98ee0;
+  --serif:'Cormorant Garamond',Georgia,serif;
+  --sans:'Outfit',system-ui,sans-serif;
   --r:14px;
 }
 ::-webkit-scrollbar{width:0}
-body{background:var(--bg);color:var(--txt);font-family:var(--sans)}
+body{background:var(--bg);color:var(--txt);font-family:var(--sans);-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;}
 @keyframes fu{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
 @keyframes si{from{opacity:0;transform:translateX(16px)}to{opacity:1;transform:translateX(0)}}
 @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.1)}}
@@ -218,7 +225,7 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans)}
 @keyframes sh{0%{background-position:-200% 0}100%{background-position:200% 0}}
 @keyframes pop{0%{transform:scale(.6);opacity:0}70%{transform:scale(1.15)}100%{transform:scale(1);opacity:1}}
 @keyframes slideUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
-.gl{background:var(--s1);backdrop-filter:blur(16px);border:1px solid var(--bdr);border-radius:var(--r)}
+.gl{background:var(--s1);backdrop-filter:blur(20px);border:1px solid var(--bdr);border-radius:var(--r);box-shadow:0 2px 12px rgba(0,0,0,.3)}
 .gold{background:linear-gradient(135deg,var(--gold),var(--gold2),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200%;animation:sh 4s linear infinite}
 .btn{border:none;cursor:pointer;font-family:var(--sans);transition:all .18s;border-radius:var(--r)}
 .btn:active{transform:scale(.96)}
@@ -292,7 +299,7 @@ function BadgeToast({badge, onDone}) {
       <div className="gl" style={{borderRadius:18,padding:"14px 18px",display:"flex",alignItems:"center",gap:14,border:"1px solid rgba(201,168,76,.3)",boxShadow:"0 8px 32px rgba(0,0,0,.5)"}}>
         <div style={{fontSize:36,animation:"pop .5s ease"}}>{badge.icon}</div>
         <div>
-          <div style={{fontSize:10,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:2}}>🏆 Badge Unlocked!</div>
+          <div style={{fontSize:12,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:2}}>🏆 Badge Unlocked!</div>
           <div style={{fontSize:15,fontWeight:700,fontFamily:"var(--serif)"}}>{badge.name}</div>
           <div style={{fontSize:11,color:"var(--txt2)"}}>{badge.desc}</div>
         </div>
@@ -379,7 +386,7 @@ function Onboarding({onComplete}) {
   return (
     <div style={{background:"var(--bg)",minHeight:"100vh",display:"flex",flexDirection:"column",padding:"0 0 40px"}}>
       <div style={{padding:"60px 24px 20px",textAlign:"center"}}>
-        <div style={{fontSize:10,fontWeight:600,color:"var(--gold)",letterSpacing:3,textTransform:"uppercase",marginBottom:6}}>Step {step+1} of 3</div>
+        <div style={{fontSize:12,fontWeight:600,color:"var(--gold)",letterSpacing:3,textTransform:"uppercase",marginBottom:6}}>Step {step+1} of 3</div>
         <h1 style={{fontFamily:"var(--serif)",fontSize:24,fontWeight:700,marginBottom:4}}>{cur.title}</h1>
         <p style={{fontSize:12,color:"var(--txt3)"}}>{cur.sub}</p>
       </div>
@@ -392,7 +399,7 @@ function Onboarding({onComplete}) {
         <button disabled={!cur.canNext} onClick={()=>{
           if(step<2) setStep(s=>s+1);
           else onComplete(name.trim(), pref);
-        }} style={{width:"100%",padding:"14px",background:cur.canNext?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:cur.canNext?"#07090f":"var(--txt3)",fontSize:15,fontWeight:700,borderRadius:16,border:"none",cursor:cur.canNext?"pointer":"default",fontFamily:"var(--sans)",transition:"all .2s"}}>
+        }} style={{width:"100%",padding:"14px",background:cur.canNext?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:cur.canNext?"var(--bg)":"var(--txt3)",fontSize:15,fontWeight:700,borderRadius:16,border:"none",cursor:cur.canNext?"pointer":"default",fontFamily:"var(--sans)",transition:"all .2s"}}>
           {step<2?"Continue →":"Start Training 💃"}
         </button>
       </div>
@@ -772,7 +779,7 @@ export default function App() {
           {tab==="home"&&(
             <div style={{animation:"fu .4s ease"}}>
               <div style={{padding:"44px 18px 14px",background:"linear-gradient(180deg,rgba(201,168,76,.06) 0%,transparent)"}}>
-                <div style={{fontSize:10,fontWeight:600,color:"var(--gold)",letterSpacing:3,textTransform:"uppercase",marginBottom:2}}>DVIDA Bronze Trainer</div>
+                <div style={{fontSize:12,fontWeight:600,color:"var(--gold)",letterSpacing:3,textTransform:"uppercase",marginBottom:2}}>DVIDA Bronze Trainer</div>
                 <h1 style={{fontFamily:"var(--serif)",fontSize:28,fontWeight:700,lineHeight:1.1}}><span className="gold">{greeting}</span></h1>
                 <p style={{fontSize:12,color:"var(--txt3)",marginTop:3}}>American Smooth & Rhythm · AI-Powered</p>
               </div>
@@ -784,13 +791,13 @@ export default function App() {
                     <div key={i} className="gl" style={{borderRadius:12,padding:"12px 6px",textAlign:"center",animation:`fu .4s ease ${i*.06}s both`}}>
                       <div style={{fontSize:18,marginBottom:2}}>{em}</div>
                       <div style={{fontSize:16,fontWeight:700,color:"var(--gold)",fontFamily:"var(--serif)"}}>{v}</div>
-                      <div style={{fontSize:9,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:.8}}>{l}</div>
+                      <div style={{fontSize:11,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:.8}}>{l}</div>
                     </div>
                   ))}
                 </div>
                 {/* XP bar */}
                 <div style={{marginTop:10}}>
-                  <div style={{display:"flex",justifyContent:"space-between",fontSize:10,color:"var(--txt3)",marginBottom:4}}>
+                  <div style={{display:"flex",justifyContent:"space-between",fontSize:12,color:"var(--txt3)",marginBottom:4}}>
                     <span>Level {prog.level}</span><span>{prog.xp%100}/100 XP</span>
                   </div>
                   <div style={{height:4,borderRadius:2,background:"var(--s1)"}}>
@@ -816,10 +823,10 @@ export default function App() {
                   <div style={{flex:1}}>
                     <div style={{fontSize:13,fontWeight:600,marginBottom:2}}>Daily Practice Goal</div>
                     <div style={{fontSize:11,color:"var(--txt2)"}}>{todayMin} / {prog.dailyGoalMinutes} min today</div>
-                    {goalPct>=100&&<div style={{fontSize:10,color:"var(--grn)",marginTop:2,fontWeight:600}}>✓ Goal complete!</div>}
+                    {goalPct>=100&&<div style={{fontSize:12,color:"var(--grn)",marginTop:2,fontWeight:600}}>✓ Goal complete!</div>}
                   </div>
                   <button className="btn" onClick={()=>setShowGoalSetter(!showGoalSetter)}
-                    style={{background:"none",color:"var(--txt3)",fontSize:10,padding:"4px 8px",border:"1px solid var(--bdr)"}}>
+                    style={{background:"none",color:"var(--txt3)",fontSize:12,padding:"4px 8px",border:"1px solid var(--bdr)"}}>
                     {prog.dailyGoalMinutes}m
                   </button>
                 </div>
@@ -840,10 +847,10 @@ export default function App() {
 
               {/* Today's Challenge */}
               <Row>
-                <div style={{borderRadius:16,padding:16,background:`linear-gradient(135deg,${todayChallenge.dance.color}bb,${todayChallenge.dance.color}44)`,border:"1px solid rgba(255,255,255,.07)",opacity:challengeDoneToday?.7:1}}>
+                <div style={{borderRadius:16,padding:16,background:`linear-gradient(135deg,${todayChallenge.dance.color}bb,${todayChallenge.dance.color}44)`,border:"1px solid var(--bdr)",opacity:challengeDoneToday?.7:1}}>
                   <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
-                    <div style={{fontSize:10,fontWeight:700,color:"var(--gold)",letterSpacing:2}}>⚡ TODAY'S CHALLENGE</div>
-                    {challengeDoneToday&&<div style={{fontSize:10,color:"var(--grn)",fontWeight:600}}>✓ Done</div>}
+                    <div style={{fontSize:12,fontWeight:700,color:"var(--gold)",letterSpacing:2}}>⚡ TODAY'S CHALLENGE</div>
+                    {challengeDoneToday&&<div style={{fontSize:12,color:"var(--grn)",fontWeight:600}}>✓ Done</div>}
                   </div>
                   <div style={{display:"flex",alignItems:"center",gap:12}}>
                     <div style={{fontSize:34}}>{todayChallenge.dance.emoji}</div>
@@ -874,7 +881,7 @@ export default function App() {
                     <div key={i} className="gl card" onClick={q.a} style={{padding:14,animation:`fu .4s ease ${.15+i*.06}s both`}}>
                       <div style={{fontSize:26,marginBottom:5}}>{q.em}</div>
                       <div style={{fontSize:13,fontWeight:600,marginBottom:1}}>{q.l}</div>
-                      <div style={{fontSize:10,color:"var(--txt3)"}}>{q.d}</div>
+                      <div style={{fontSize:12,color:"var(--txt3)"}}>{q.d}</div>
                     </div>
                   ))}
                 </div>
@@ -885,7 +892,7 @@ export default function App() {
                 <div style={{fontSize:17,fontFamily:"var(--serif)",fontWeight:600,marginBottom:10}}>DVIDA Syllabi</div>
                 {["smooth","rhythm"].map(cat=>(
                   <div key={cat} style={{marginBottom:14}}>
-                    <div style={{fontSize:10,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>
+                    <div style={{fontSize:12,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>
                       American {cat==="smooth"?"Smooth":"Rhythm"}
                     </div>
                     <div style={{display:"flex",gap:9,overflowX:"auto",paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
@@ -893,10 +900,10 @@ export default function App() {
                         const pct = dancePct(d);
                         return(
                           <div key={d.id} className="card" onClick={()=>{setSelDance(d);setTab("syllabus");}}
-                            style={{minWidth:110,borderRadius:16,padding:"16px 12px",textAlign:"center",background:`linear-gradient(145deg,${d.color}bb,${d.color}44)`,border:"1px solid rgba(255,255,255,.07)",animation:`si .4s ease ${i*.07}s both`,flexShrink:0}}>
+                            style={{minWidth:110,borderRadius:16,padding:"16px 12px",textAlign:"center",background:`linear-gradient(145deg,${d.color}bb,${d.color}44)`,border:"1px solid var(--bdr)",animation:`si .4s ease ${i*.07}s both`,flexShrink:0}}>
                             <div style={{fontSize:30,marginBottom:5}}>{d.emoji}</div>
                             <div style={{fontSize:12,fontWeight:700}}>{d.name}</div>
-                            <div style={{fontSize:9,color:pct>0?"var(--gold)":"var(--txt3)",marginTop:2}}>{pct>0?`${pct}% done`:"Start"}</div>
+                            <div style={{fontSize:11,color:pct>0?"var(--gold)":"var(--txt3)",marginTop:2}}>{pct>0?`${pct}% done`:"Start"}</div>
                           </div>
                         );
                       })}
@@ -927,11 +934,11 @@ export default function App() {
                       <div style={{flex:1}}>
                         <div style={{display:"flex",alignItems:"center",gap:8}}>
                           <span style={{fontSize:14,fontWeight:700}}>{d.name}</span>
-                          <span style={{fontSize:9,padding:"2px 6px",borderRadius:6,background:"rgba(255,255,255,.06)",color:"var(--txt2)"}}>{d.style.replace("American ","")}</span>
+                          <span style={{fontSize:11,padding:"2px 6px",borderRadius:6,background:"var(--s1)",color:"var(--txt2)"}}>{d.style.replace("American ","")}</span>
                         </div>
                         <div style={{fontSize:11,color:"var(--txt2)",marginTop:2,marginBottom:6}}>{Object.values(d.levels).flat().length} figures · 4 levels</div>
                         <div style={{display:"flex",alignItems:"center",gap:7}}>
-                          <div style={{flex:1,height:4,borderRadius:2,background:"rgba(255,255,255,.05)"}}>
+                          <div style={{flex:1,height:4,borderRadius:2,background:"var(--s1)"}}>
                             <div style={{height:"100%",borderRadius:2,width:`${pct}%`,background:"var(--gold)",transition:"width .5s"}}/>
                           </div>
                           <span style={{fontSize:11,color:"var(--gold)",fontWeight:700}}>{pct}%</span>
@@ -973,7 +980,7 @@ export default function App() {
                           <div style={{display:"flex",alignItems:"center",gap:8}}>
                             <span style={{fontSize:13,fontWeight:700,color:colors[li]}}>{lvl}</span>
                             {!unlocked&&<span style={{color:"var(--txt3)"}}>{ic(Ic.Lock,12)}</span>}
-                            {pct>=1&&<span style={{fontSize:10,color:colors[li]}}>✓ Complete</span>}
+                            {pct>=1&&<span style={{fontSize:12,color:colors[li]}}>✓ Complete</span>}
                           </div>
                           <div style={{fontSize:11,color:"var(--txt3)",marginTop:2}}>{figs.length} figures · {done} done</div>
                         </div>
@@ -1014,12 +1021,12 @@ export default function App() {
                       </div>
                       <div style={{flex:1}}>
                         <div style={{fontSize:13,fontWeight:600}}>{fig}</div>
-                        <div style={{fontSize:10,color:"var(--txt3)",marginTop:1}}>DVIDA {selLevel} · {selDance.name}</div>
+                        <div style={{fontSize:12,color:"var(--txt3)",marginTop:1}}>DVIDA {selLevel} · {selDance.name}</div>
                       </div>
                       <div style={{display:"flex",gap:5,flexShrink:0}}>
-                        <button className="btn" onClick={()=>startDrill(selDance,selLevel,fig)} style={{padding:"4px 9px",background:"rgba(201,168,76,.08)",border:"1px solid rgba(201,168,76,.15)",color:"var(--gold)",fontSize:10}}>Drill</button>
-                        <button className="btn" onClick={()=>addToRoutine(selDance,selLevel,fig)} style={{padding:"4px 9px",background:inRoutine?"rgba(107,158,207,.15)":"var(--s1)",border:`1px solid ${inRoutine?"rgba(107,158,207,.2)":"var(--bdr)"}`,color:inRoutine?"var(--blu)":"var(--txt3)",fontSize:10}}>{ic(Ic.Plus,12)}</button>
-                        {!done&&<button className="btn" onClick={()=>completeFig(selDance,selLevel,fig)} style={{padding:"4px 9px",background:"rgba(106,191,123,.08)",border:"1px solid rgba(106,191,123,.15)",color:"var(--grn)",fontSize:10}}>✓</button>}
+                        <button className="btn" onClick={()=>startDrill(selDance,selLevel,fig)} style={{padding:"4px 9px",background:"rgba(201,168,76,.08)",border:"1px solid rgba(201,168,76,.15)",color:"var(--gold)",fontSize:12}}>Drill</button>
+                        <button className="btn" onClick={()=>addToRoutine(selDance,selLevel,fig)} style={{padding:"4px 9px",background:inRoutine?"rgba(107,158,207,.15)":"var(--s1)",border:`1px solid ${inRoutine?"rgba(107,158,207,.2)":"var(--bdr)"}`,color:inRoutine?"var(--blu)":"var(--txt3)",fontSize:12}}>{ic(Ic.Plus,12)}</button>
+                        {!done&&<button className="btn" onClick={()=>completeFig(selDance,selLevel,fig)} style={{padding:"4px 9px",background:"rgba(106,191,123,.08)",border:"1px solid rgba(106,191,123,.15)",color:"var(--grn)",fontSize:12}}>✓</button>}
                       </div>
                     </div>
                   );
@@ -1050,7 +1057,7 @@ export default function App() {
                 {chatMsgs.map((m,i)=>(
                   <div key={i} style={{display:"flex",justifyContent:m.role==="user"?"flex-end":"flex-start",marginBottom:10,animation:"fu .3s ease"}}>
                     <div style={{maxWidth:"86%",padding:"10px 14px",borderRadius:16,background:m.role==="user"?"rgba(201,168,76,.13)":"var(--s1)",border:`1px solid ${m.role==="user"?"rgba(201,168,76,.2)":"var(--bdr)"}`,borderBottomRightRadius:m.role==="user"?3:16,borderBottomLeftRadius:m.role==="user"?16:3}}>
-                      {m.role==="assistant"&&<div style={{fontSize:9,color:"var(--gold)",fontWeight:700,marginBottom:3,letterSpacing:1}}>DVIDA COACH</div>}
+                      {m.role==="assistant"&&<div style={{fontSize:11,color:"var(--gold)",fontWeight:700,marginBottom:3,letterSpacing:1}}>DVIDA COACH</div>}
                       <div style={{fontSize:13,lineHeight:1.65,whiteSpace:"pre-wrap"}}>{m.content}</div>
                     </div>
                   </div>
@@ -1058,12 +1065,12 @@ export default function App() {
                 {chatLoad&&<div style={{display:"flex",gap:8,alignItems:"center",color:"var(--txt3)",fontSize:12}}><span className="spin"/> Thinking...</div>}
                 <div ref={chatEnd}/>
               </div>
-              <div style={{padding:"10px 18px",borderTop:"1px solid var(--bdr)",background:"rgba(7,9,15,.95)",flexShrink:0}}>
+              <div style={{padding:"10px 18px",borderTop:"1px solid var(--bdr)",background:"rgba(13,16,24,.96)",flexShrink:0}}>
                 <div style={{display:"flex",gap:7}}>
                   <input value={chatIn} onChange={e=>setChatIn(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendChat()} placeholder="Ask about any DVIDA figure..."
                     style={{flex:1,padding:"11px 14px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt)",fontSize:13}}/>
                   <button className="btn" onClick={sendChat} disabled={chatLoad||!chatIn.trim()}
-                    style={{width:42,height:42,background:chatIn.trim()?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:chatIn.trim()?"#07090f":"var(--txt3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
+                    style={{width:42,height:42,background:chatIn.trim()?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:chatIn.trim()?"var(--bg)":"var(--txt3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
                     {ic(Ic.Send,16)}
                   </button>
                 </div>
@@ -1093,7 +1100,7 @@ export default function App() {
                       ))}
                     </div>
                     <div style={{fontSize:52,fontWeight:700,fontFamily:"var(--serif)",color:"var(--gold)"}}>{met.bpm}</div>
-                    <div style={{fontSize:10,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:2,marginBottom:18}}>BPM</div>
+                    <div style={{fontSize:12,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:2,marginBottom:18}}>BPM</div>
                     {/* FIX: only restart on mouseUp, not every pixel drag */}
                     <input type="range" min={40} max={240} value={met.bpm}
                       onChange={e=>met.setBpm(+e.target.value)}
@@ -1104,7 +1111,7 @@ export default function App() {
                     <div style={{display:"flex",gap:5,justifyContent:"center",flexWrap:"wrap",marginBottom:18}}>
                       {ALL_DANCES.map(d=>(
                         <button key={d.id} className="btn" onClick={()=>{met.setBpm(d.bpm);met.setTs(d.tempo==="3/4"?3:d.tempo==="2/4"?2:4);if(met.on)met.restart();}}
-                          style={{padding:"4px 9px",borderRadius:8,background:met.bpm===d.bpm?"rgba(201,168,76,.15)":"var(--s1)",border:`1px solid ${met.bpm===d.bpm?"rgba(201,168,76,.3)":"var(--bdr)"}`,color:met.bpm===d.bpm?"var(--gold)":"var(--txt3)",fontSize:10}}>
+                          style={{padding:"4px 9px",borderRadius:8,background:met.bpm===d.bpm?"rgba(201,168,76,.15)":"var(--s1)",border:`1px solid ${met.bpm===d.bpm?"rgba(201,168,76,.3)":"var(--bdr)"}`,color:met.bpm===d.bpm?"var(--gold)":"var(--txt3)",fontSize:12}}>
                           {d.emoji} {d.bpm}
                         </button>
                       ))}
@@ -1131,7 +1138,7 @@ export default function App() {
                   {drillOn&&drillDance?(
                     <div className="gl" style={{borderRadius:20,padding:22,textAlign:"center"}}>
                       <div style={{fontSize:40,marginBottom:6}}>{drillDance.emoji}</div>
-                      <div style={{fontSize:9,color:"var(--txt3)",letterSpacing:2,textTransform:"uppercase"}}>DRILLING · {drillLvlRef.current}</div>
+                      <div style={{fontSize:11,color:"var(--txt3)",letterSpacing:2,textTransform:"uppercase"}}>DRILLING · {drillLvlRef.current}</div>
                       <div style={{fontFamily:"var(--serif)",fontSize:20,margin:"4px 0"}}>{drillFig}</div>
                       <div style={{fontSize:11,color:"var(--txt2)",marginBottom:16}}>{drillDance.name}</div>
                       <div style={{fontSize:44,fontWeight:700,color:"var(--gold)",fontFamily:"var(--serif)",marginBottom:16}}>{fmtT(drillSec)}</div>
@@ -1149,13 +1156,13 @@ export default function App() {
                             {label:"🎵 Music",       content:drillPlan.song_tempo,                                          color:"var(--txt2)"},
                           ].map(({label,content,color},i)=>content&&(
                             <div key={i} className="gl" style={{borderRadius:11,padding:12,marginBottom:8}}>
-                              <div style={{fontSize:10,fontWeight:700,color,marginBottom:4}}>{label}</div>
+                              <div style={{fontSize:12,fontWeight:700,color,marginBottom:4}}>{label}</div>
                               <div style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,whiteSpace:"pre-wrap"}}>{content}</div>
                             </div>
                           ))}
                         </div>
                       )}
-                      <button className="btn" onClick={endDrill} style={{padding:"11px 32px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"#07090f",fontSize:13,fontWeight:700,marginTop:12}}>
+                      <button className="btn" onClick={endDrill} style={{padding:"11px 32px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:13,fontWeight:700,marginTop:12}}>
                         FINISH DRILL
                       </button>
                     </div>
@@ -1167,12 +1174,12 @@ export default function App() {
                           <div style={{display:"flex",alignItems:"center",gap:8,marginBottom:7}}>
                             <span style={{fontSize:20}}>{d.emoji}</span>
                             <span style={{fontSize:13,fontWeight:700}}>{d.name}</span>
-                            <span style={{fontSize:9,color:"var(--txt3)",marginLeft:"auto"}}>{d.timing}</span>
+                            <span style={{fontSize:11,color:"var(--txt3)",marginLeft:"auto"}}>{d.timing}</span>
                           </div>
                           <div style={{display:"flex",gap:5,flexWrap:"wrap"}}>
                             {["Bronze I","Bronze II"].flatMap(lvl=>(d.levels[lvl]||[]).map(fig=>({fig,lvl}))).slice(0,6).map(({fig,lvl})=>(
                               <button key={fig+lvl} className="btn" onClick={()=>startDrill(d,lvl,fig)}
-                                style={{padding:"3px 8px",borderRadius:7,background:"rgba(201,168,76,.06)",border:"1px solid rgba(201,168,76,.1)",color:"var(--gold)",fontSize:9}}>{fig}</button>
+                                style={{padding:"3px 8px",borderRadius:7,background:"rgba(201,168,76,.06)",border:"1px solid rgba(201,168,76,.1)",color:"var(--gold)",fontSize:11}}>{fig}</button>
                             ))}
                           </div>
                         </div>
@@ -1212,7 +1219,7 @@ export default function App() {
                   ):(
                     <div style={{animation:"fu .4s ease"}}>
                       <div className="gl" style={{borderRadius:16,padding:18,marginBottom:12}}>
-                        <div style={{fontSize:10,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>{quiz.dance.name} · {quiz.lvl}</div>
+                        <div style={{fontSize:12,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:6}}>{quiz.dance.name} · {quiz.lvl}</div>
                         <div style={{fontFamily:"var(--serif)",fontSize:17,marginBottom:4}}>Which figure is described?</div>
                         <div style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,fontStyle:"italic",minHeight:40}}>{quizExplain||"Loading description..."}</div>
                       </div>
@@ -1240,7 +1247,7 @@ export default function App() {
                             <div style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6}}>Answer: <strong style={{color:"var(--gold)"}}>{quiz.correct}</strong></div>
                           </div>
                           <button className="btn" onClick={()=>{setQuiz(null);setQuizResult(null);setQuizExplain("");}}
-                            style={{width:"100%",padding:"11px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"#07090f",fontSize:13,fontWeight:700}}>
+                            style={{width:"100%",padding:"11px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:13,fontWeight:700}}>
                             Next Question
                           </button>
                         </div>
@@ -1260,7 +1267,7 @@ export default function App() {
                         <div style={{fontFamily:"var(--serif)",fontSize:18,marginBottom:6}}>DVIDA Technique Analysis</div>
                         <p style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,marginBottom:18}}>Claude Vision AI analyzes posture, frame, alignment, balance, and expression against DVIDA Bronze standards.</p>
                         <div style={{display:"flex",gap:10,justifyContent:"center"}}>
-                          <button className="btn" onClick={startCam} style={{padding:"11px 22px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"#07090f",fontSize:12,display:"flex",alignItems:"center",gap:7}}>
+                          <button className="btn" onClick={startCam} style={{padding:"11px 22px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:12,display:"flex",alignItems:"center",gap:7}}>
                             {ic(Ic.Camera,16)} Live Camera
                           </button>
                           <button className="btn" onClick={()=>fileRef.current?.click()} style={{padding:"11px 18px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt2)",fontSize:12,display:"flex",alignItems:"center",gap:7}}>
@@ -1275,7 +1282,7 @@ export default function App() {
                           {analyzing&&<div style={{position:"absolute",inset:0,background:"rgba(7,9,15,.75)",display:"flex",alignItems:"center",justifyContent:"center",flexDirection:"column",gap:8}}><span className="spin" style={{width:30,height:30}}/><span style={{fontSize:12,color:"var(--gold)"}}>Analyzing with DVIDA standards...</span></div>}
                         </div>
                         <div style={{display:"flex",gap:9,justifyContent:"center"}}>
-                          <button className="btn" onClick={captureFromCamera} disabled={analyzing} style={{padding:"10px 22px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"#07090f",fontSize:12,opacity:analyzing?0.5:1}}>Analyze Now</button>
+                          <button className="btn" onClick={captureFromCamera} disabled={analyzing} style={{padding:"10px 22px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:12,opacity:analyzing?0.5:1}}>Analyze Now</button>
                           <button className="btn" onClick={stopCam} style={{padding:"10px 18px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt2)",fontSize:12}}>{ic(Ic.X,14)} Close</button>
                         </div>
                       </>
@@ -1290,7 +1297,7 @@ export default function App() {
                     <div style={{animation:"fu .4s ease"}}>
                       <div className="gl" style={{borderRadius:18,padding:20,textAlign:"center",marginBottom:10}}>
                         <div style={{fontSize:46,fontWeight:700,fontFamily:"var(--serif)",color:analysis.overall>=80?"var(--grn)":analysis.overall>=60?"var(--gold)":"var(--red)"}}>{analysis.overall}</div>
-                        <div style={{fontSize:10,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:2}}>Overall · DVIDA Standards</div>
+                        <div style={{fontSize:12,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:2}}>Overall · DVIDA Standards</div>
                       </div>
                       <div className="gl" style={{borderRadius:18,padding:16,marginBottom:10}}>
                         {Object.entries(analysis.scores||{}).map(([k,v])=><ScoreBar key={k} label={k} val={v}/>)}
@@ -1330,14 +1337,14 @@ export default function App() {
                         if(!styled.length) return null;
                         return(
                           <div key={style} style={{marginBottom:16}}>
-                            <div style={{fontSize:10,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>{style.replace("American ","")}</div>
+                            <div style={{fontSize:12,fontWeight:700,color:"var(--gold)",letterSpacing:2,textTransform:"uppercase",marginBottom:8}}>{style.replace("American ","")}</div>
                             {styled.map((r,i)=>(
                               <div key={r.id} className="gl" style={{borderRadius:12,padding:12,marginBottom:7,display:"flex",alignItems:"center",gap:10,animation:`fu .3s ease ${i*.04}s both`}}>
-                                <div style={{width:24,height:24,borderRadius:6,background:"rgba(201,168,76,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:10,fontWeight:700,color:"var(--gold)"}}>{i+1}</div>
+                                <div style={{width:24,height:24,borderRadius:6,background:"rgba(201,168,76,.15)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,color:"var(--gold)"}}>{i+1}</div>
                                 <span style={{fontSize:18}}>{r.emoji}</span>
                                 <div style={{flex:1}}>
                                   <div style={{fontSize:13,fontWeight:600}}>{r.fig}</div>
-                                  <div style={{fontSize:10,color:"var(--txt3)"}}>{r.dName} · {r.level}</div>
+                                  <div style={{fontSize:12,color:"var(--txt3)"}}>{r.dName} · {r.level}</div>
                                 </div>
                                 <button className="btn" onClick={()=>removeFromRoutine(r.id)} style={{background:"none",color:"var(--red)",padding:4}}>{ic(Ic.Trash,14)}</button>
                               </div>
@@ -1345,7 +1352,7 @@ export default function App() {
                           </div>
                         );
                       })}
-                      <button className="btn" onClick={genRoutineSheet} style={{width:"100%",padding:"11px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"#07090f",fontSize:13,fontWeight:700,marginTop:4}}>
+                      <button className="btn" onClick={genRoutineSheet} style={{width:"100%",padding:"11px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:13,fontWeight:700,marginTop:4}}>
                         🎬 Get AI Coaching Notes
                       </button>
                       {shareRoutine&&shareRoutine!=="loading"&&(
@@ -1374,7 +1381,7 @@ export default function App() {
                     <div key={i} className="gl" style={{borderRadius:12,padding:"12px 6px",textAlign:"center",animation:`fu .35s ease ${i*.05}s both`}}>
                       <div style={{fontSize:16,marginBottom:2}}>{em}</div>
                       <div style={{fontSize:18,fontWeight:700,color:"var(--gold)",fontFamily:"var(--serif)"}}>{v}</div>
-                      <div style={{fontSize:9,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:.6}}>{l}</div>
+                      <div style={{fontSize:11,color:"var(--txt3)",textTransform:"uppercase",letterSpacing:.6}}>{l}</div>
                     </div>
                   ))}
                 </div>
@@ -1384,9 +1391,9 @@ export default function App() {
                   <div style={{display:"flex",alignItems:"flex-end",gap:5,height:90,justifyContent:"space-between"}}>
                     {weekData.map((d,i)=>(
                       <div key={i} style={{flex:1,textAlign:"center",display:"flex",flexDirection:"column",alignItems:"center",justifyContent:"flex-end",height:"100%"}}>
-                        {d.min>0&&<div style={{fontSize:8,color:"var(--gold)",marginBottom:2,fontWeight:600}}>{d.min}m</div>}
+                        {d.min>0&&<div style={{fontSize:11,color:"var(--gold)",marginBottom:2,fontWeight:600}}>{d.min}m</div>}
                         <div style={{width:"100%",height:`${Math.max(4,(d.min/maxMin)*72)}%`,borderRadius:4,background:d.isToday?"linear-gradient(180deg,var(--gold),#a08030)":d.min>0?"rgba(201,168,76,.22)":"var(--s1)",transition:"height .5s"}}/>
-                        <div style={{fontSize:9,color:d.isToday?"var(--gold)":"var(--txt3)",marginTop:5,fontWeight:d.isToday?600:400}}>{d.day}</div>
+                        <div style={{fontSize:11,color:d.isToday?"var(--gold)":"var(--txt3)",marginTop:5,fontWeight:d.isToday?600:400}}>{d.day}</div>
                       </div>
                     ))}
                   </div>
@@ -1421,7 +1428,7 @@ export default function App() {
                         {earned&&<div style={{position:"absolute",top:7,right:7,color:"var(--gold)"}}>{ic(Ic.Check,13)}</div>}
                         <div style={{fontSize:24,marginBottom:4}}>{b.icon}</div>
                         <div style={{fontSize:11,fontWeight:700,color:earned?"var(--gold)":"inherit"}}>{b.name}</div>
-                        <div style={{fontSize:9,color:"var(--txt3)",marginTop:2,lineHeight:1.4}}>{b.desc}</div>
+                        <div style={{fontSize:11,color:"var(--txt3)",marginTop:2,lineHeight:1.4}}>{b.desc}</div>
                       </div>
                     );
                   })}
@@ -1445,9 +1452,9 @@ export default function App() {
                   <textarea value={postIn} onChange={e=>setPostIn(e.target.value)} placeholder="Share a DVIDA tip, celebrate a win, or ask for help..."
                     style={{width:"100%",background:"transparent",border:"none",color:"var(--txt)",fontSize:13,resize:"none",height:52,lineHeight:1.5}}/>
                   <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginTop:6}}>
-                    <span style={{fontSize:9,color:"var(--txt3)"}}>Shared with all dancers</span>
+                    <span style={{fontSize:11,color:"var(--txt3)"}}>Shared with all dancers</span>
                     <button className="btn" onClick={submitPost} disabled={postLoad||!postIn.trim()}
-                      style={{padding:"6px 14px",background:postIn.trim()?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:postIn.trim()?"#07090f":"var(--txt3)",fontSize:11,display:"flex",alignItems:"center",gap:4}}>
+                      style={{padding:"6px 14px",background:postIn.trim()?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:postIn.trim()?"var(--bg)":"var(--txt3)",fontSize:11,display:"flex",alignItems:"center",gap:4}}>
                       {postLoad?<span className="spin" style={{width:12,height:12}}/>:ic(Ic.Send,12)} Post
                     </button>
                   </div>
@@ -1461,7 +1468,7 @@ export default function App() {
                       <div style={{width:32,height:32,borderRadius:"50%",background:"rgba(201,168,76,.1)",display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700,color:"var(--gold)"}}>{(p.user||"D").charAt(0).toUpperCase()}</div>
                       <div>
                         <div style={{fontSize:11,fontWeight:600}}>{p.user||"Dancer"}</div>
-                        <div style={{fontSize:9,color:"var(--txt3)"}}>{ago(p.time)}</div>
+                        <div style={{fontSize:11,color:"var(--txt3)"}}>{ago(p.time)}</div>
                       </div>
                     </div>
                     <div style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,marginBottom:8}}>{p.content}</div>
@@ -1479,7 +1486,7 @@ export default function App() {
 
         {/* NAV BAR */}
         <div style={{position:"fixed",bottom:0,left:"50%",transform:"translateX(-50%)",width:"100%",maxWidth:480,zIndex:100}}>
-          <div style={{background:"rgba(7,9,15,.97)",backdropFilter:"blur(16px)",borderTop:"1px solid var(--bdr)",padding:"5px 0 max(5px,env(safe-area-inset-bottom))",display:"flex",justifyContent:"space-around"}}>
+          <div style={{background:"rgba(13,16,24,.98)",backdropFilter:"blur(20px)",borderTop:"1px solid var(--bdr)",padding:"5px 0 max(5px,env(safe-area-inset-bottom))",display:"flex",justifyContent:"space-around"}}>
             {[
               {k:"home",     l:"Home",    I:Ic.Home},
               {k:"syllabus", l:"Syllabus",I:Ic.Book},
@@ -1492,7 +1499,7 @@ export default function App() {
                 style={{background:"none",color:tab===k?"var(--gold)":"var(--txt3)",display:"flex",flexDirection:"column",alignItems:"center",gap:2,padding:"4px 6px",position:"relative",minWidth:0}}>
                 {tab===k&&<div style={{position:"absolute",top:-1,left:"10%",right:"10%",height:2,borderRadius:1,background:"var(--gold)"}}/>}
                 {ic(I,18)}
-                <span style={{fontSize:9,fontWeight:tab===k?600:400,letterSpacing:.2,whiteSpace:"nowrap"}}>{l}</span>
+                <span style={{fontSize:11,fontWeight:tab===k?600:400,letterSpacing:.2,whiteSpace:"nowrap"}}>{l}</span>
               </button>
             ))}
           </div>
