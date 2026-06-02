@@ -1,10 +1,13 @@
 // Vercel Serverless Function — proxies Anthropic vision analysis
-// Accepts base64 image, returns structured technique scores JSON
+// Accepts base64 image, returns structured technique scores JSON.
+// Origin-locked + rate-limited via _guard.
+
+import { guard } from './_guard.js';
+
+const MAX_IMAGE_CHARS = 7_000_000; // ~5MB decoded; reject oversized uploads
 
 export default async function handler(req, res) {
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (!guard(req, res)) return;
 
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
@@ -12,10 +15,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { imageData, prompt } = req.body;
+    const { imageData, prompt } = req.body || {};
 
-    if (!imageData) {
+    if (!imageData || typeof imageData !== 'string') {
       return res.status(400).json({ error: 'imageData (base64 JPEG) required' });
+    }
+    if (imageData.length > MAX_IMAGE_CHARS) {
+      return res.status(413).json({ error: 'Image too large' });
     }
 
     const upstream = await fetch('https://api.anthropic.com/v1/messages', {
@@ -38,7 +44,8 @@ export default async function handler(req, res) {
             },
             {
               type: 'text',
-              text: prompt || 'Analyze this dancer using DVIDA American Smooth/Rhythm Bronze standards. Score each area 0-100.',
+              text: (typeof prompt === 'string' && prompt.slice(0, 500)) ||
+                'Analyze this dancer using DVIDA American Smooth/Rhythm Bronze standards. Score each area 0-100.',
             },
           ],
         }],

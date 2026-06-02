@@ -64,24 +64,35 @@ const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 const SYSTEM = `You are an elite DVIDA-certified ballroom dance coach specializing in American Smooth (Waltz, Foxtrot, Tango, Viennese Waltz) and American Rhythm (Rumba, Cha-Cha, East Coast Swing, Samba, Bolero, Mambo). You follow the DVIDA Bronze syllabus precisely.
 Your personality: Warm, encouraging, technically precise, passionate. Give specific, actionable feedback using correct DVIDA terminology. Be concise — dancers read on mobile between sessions.`;
 
+// Fetch with an abort timeout so a stalled request never hangs the UI forever.
+async function fetchJSON(url, payload, timeoutMs=30000) {
+  const ctrl = new AbortController();
+  const t = setTimeout(() => ctrl.abort(), timeoutMs);
+  try {
+    const r = await fetch(url, {
+      method:"POST", headers:{"Content-Type":"application/json"},
+      body: JSON.stringify(payload), signal: ctrl.signal,
+    });
+    let d = null;
+    try { d = await r.json(); } catch { /* non-JSON body */ }
+    if (!r.ok) throw new Error(d?.error || `Request failed (${r.status})`);
+    if (d?.error) throw new Error(d.error);
+    return d;
+  } catch (e) {
+    if (e.name === "AbortError") throw new Error("Request timed out — please try again.");
+    throw e;
+  } finally {
+    clearTimeout(t);
+  }
+}
+
 async function callAI(messages, sys=SYSTEM, max=1000) {
-  const r = await fetch("/api/chat", {
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ messages, system:sys, max_tokens:max })
-  });
-  if (!r.ok) throw new Error(`API error ${r.status}`);
-  const d = await r.json();
-  if (d.error) throw new Error(d.error);
+  const d = await fetchJSON("/api/chat", { messages, system:sys, max_tokens:max });
   return d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n") || "";
 }
 
 async function visionAI(b64) {
-  const r = await fetch("/api/vision", {
-    method:"POST", headers:{"Content-Type":"application/json"},
-    body: JSON.stringify({ imageData:b64 })
-  });
-  if (!r.ok) throw new Error(`Vision error ${r.status}`);
-  return r.json();
+  return fetchJSON("/api/vision", { imageData:b64 });
 }
 
 /* ══════════════════════════════════════════════
@@ -163,35 +174,63 @@ const BADGES = [
 ══════════════════════════════════════════════ */
 function useMet() {
   const [on, setOn] = useState(false);
-  const [bpm, setBpm] = useState(120);
+  const [bpm, setBpmState] = useState(120);
   const [beat, setBeat] = useState(-1);
-  const [ts, setTs] = useState(4);
-  const iv = useRef(null), ctx = useRef(null);
+  const [ts, setTsState] = useState(4);
+  const ctx = useRef(null);
+  // Keep latest bpm/ts in refs so the scheduler and start()/restart() always
+  // read live values (incl. when set in the same handler as setBpm/setTs).
+  const bpmRef = useRef(bpm), tsRef = useRef(ts);
+  const setBpm = useCallback(v => { bpmRef.current = v; setBpmState(v); }, []);
+  const setTs  = useCallback(v => { tsRef.current = v;  setTsState(v); }, []);
 
-  const click = useCallback((acc) => {
-    if (!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
-    const c = ctx.current, o = c.createOscillator(), g = c.createGain();
+  // Look-ahead scheduler state ("A Tale of Two Clocks"): we schedule clicks on
+  // the AudioContext clock slightly ahead of time, so tempo never drifts the
+  // way a bare setInterval(60000/bpm) does over a long practice session.
+  const schedRef = useRef(null);   // 25ms lookahead timer id
+  const nextNote = useRef(0);      // AudioContext time of the next click
+  const beatRef = useRef(0);
+
+  const scheduleClick = useCallback((time, acc) => {
+    const c = ctx.current;
+    const o = c.createOscillator(), g = c.createGain();
     o.connect(g); g.connect(c.destination);
     o.frequency.value = acc ? 1000 : 700;
-    g.gain.setValueAtTime(acc ? 0.5 : 0.3, c.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, c.currentTime + 0.08);
-    o.start(c.currentTime); o.stop(c.currentTime + 0.08);
+    g.gain.setValueAtTime(acc ? 0.5 : 0.3, time);
+    g.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+    o.start(time); o.stop(time + 0.08);
   }, []);
 
   const start = useCallback(() => {
-    setOn(true); let b = 0;
-    const tick = () => { click(b===0); setBeat(b); b = (b+1) % ts; };
-    tick(); iv.current = setInterval(tick, 60000/bpm);
-  }, [bpm, ts, click]);
+    if (!ctx.current) ctx.current = new (window.AudioContext || window.webkitAudioContext)();
+    const c = ctx.current;
+    if (c.state === "suspended") c.resume();
+    if (schedRef.current) clearInterval(schedRef.current);
+    setOn(true);
+    beatRef.current = 0;
+    nextNote.current = c.currentTime + 0.06;
+    const LOOKAHEAD = 0.1; // seconds of audio scheduled ahead
+    schedRef.current = setInterval(() => {
+      const cc = ctx.current;
+      while (nextNote.current < cc.currentTime + LOOKAHEAD) {
+        const b = beatRef.current, when = nextNote.current;
+        scheduleClick(when, b === 0);
+        // Flip the UI beat indicator in sync with the scheduled audio time.
+        setTimeout(() => setBeat(b), Math.max(0, (when - cc.currentTime) * 1000));
+        nextNote.current += 60 / bpmRef.current;
+        beatRef.current = (b + 1) % tsRef.current;
+      }
+    }, 25);
+  }, [scheduleClick]);
 
   const stop = useCallback(() => {
     setOn(false); setBeat(-1);
-    if (iv.current) clearInterval(iv.current);
+    if (schedRef.current) { clearInterval(schedRef.current); schedRef.current = null; }
   }, []);
 
-  const restart = useCallback(() => { stop(); setTimeout(start, 30); }, [stop, start]);
+  const restart = useCallback(() => { start(); }, [start]);
 
-  useEffect(() => () => { if (iv.current) clearInterval(iv.current); }, []);
+  useEffect(() => () => { if (schedRef.current) clearInterval(schedRef.current); }, []);
   return { on, bpm, setBpm, beat, ts, setTs, start, stop, restart };
 }
 
@@ -248,6 +287,18 @@ const ago = iso => {
   return d<60?"just now":d<3600?`${~~(d/60)}m ago`:d<86400?`${~~(d/3600)}h ago`:`${~~(d/86400)}d ago`;
 };
 const vibrate = (ms=30) => { try { navigator.vibrate?.(ms); } catch(e) {} };
+
+// Spread onto a non-<button> element to make it keyboard-operable as a button:
+// adds role/tabindex and Enter/Space activation. Usage: <div {...clickable(fn)} />
+const clickable = (onClick, label) => ({
+  role: "button",
+  tabIndex: 0,
+  "aria-label": label,
+  onClick,
+  onKeyDown: e => {
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); onClick(e); }
+  },
+});
 
 /* ── Static sub-components ── */
 const Row = ({children, style:s}) => <div style={{padding:"0 18px",marginBottom:20,...(s||{})}}>{children}</div>;
@@ -346,7 +397,7 @@ function Onboarding({onComplete}) {
               {k:"rhythm",label:"American Rhythm",sub:"Rumba · Cha-Cha · ECS · Samba · Bolero · Mambo",em:"💃"},
               {k:"both",  label:"Both Styles",    sub:"Full DVIDA Bronze curriculum",em:"⭐"},
             ].map(o=>(
-              <div key={o.k} onClick={()=>setPref(o.k)} className="card gl" style={{padding:16,display:"flex",gap:14,alignItems:"center",border:`1px solid ${pref===o.k?"rgba(201,168,76,.4)":"var(--bdr)"}`,background:pref===o.k?"rgba(201,168,76,.08)":"var(--s1)"}}>
+              <div key={o.k} {...clickable(()=>setPref(o.k), o.label)} aria-pressed={pref===o.k} className="card gl" style={{padding:16,display:"flex",gap:14,alignItems:"center",border:`1px solid ${pref===o.k?"rgba(201,168,76,.4)":"var(--bdr)"}`,background:pref===o.k?"rgba(201,168,76,.08)":"var(--s1)"}}>
                 <div style={{fontSize:30}}>{o.em}</div>
                 <div>
                   <div style={{fontSize:14,fontWeight:600,color:pref===o.k?"var(--gold)":"var(--txt)"}}>{o.label}</div>
@@ -474,6 +525,17 @@ export default function App() {
     return all[idx];
   }, []);
 
+  // Inject global stylesheet into <head> once — persists across all render
+  // states (loading, onboarding, main app). Previously the <style> lived only
+  // inside the loading screen, so the app rendered unstyled once ready.
+  useEffect(() => {
+    const styleEl = document.createElement("style");
+    styleEl.setAttribute("data-dance-coach", "");
+    styleEl.textContent = CSS;
+    document.head.appendChild(styleEl);
+    return () => { document.head.removeChild(styleEl); };
+  }, []);
+
   // Load on mount
   useEffect(() => {
     (async () => {
@@ -490,9 +552,13 @@ export default function App() {
     })();
   }, []);
 
-  // Update + badge check + toast
-  const update = useCallback((changes) => {
+  // Update + badge check + toast.
+  // Accepts a changes object OR an updater (prev)=>changes. Always prefer the
+  // functional form when deriving from current state (xp += n, etc.) so rapid
+  // successive updates in one render don't clobber each other.
+  const update = useCallback((changesOrFn) => {
     setProg(prev => {
+      const changes = typeof changesOrFn === "function" ? changesOrFn(prev) : changesOrFn;
       const next = {...prev, ...changes};
       next.level = Math.floor(next.xp / 100) + 1;
       const today = localDate();
@@ -530,7 +596,7 @@ export default function App() {
     const key = figKey(dance.id, lvl, fig);
     if (!prog.completedFigures[key]) {
       vibrate(30);
-      update({completedFigures:{...prog.completedFigures,[key]:true}, xp:prog.xp+20});
+      update(p=>p.completedFigures[key]?{}:{completedFigures:{...p.completedFigures,[key]:true}, xp:p.xp+20});
     }
   };
 
@@ -560,9 +626,9 @@ export default function App() {
       const trimmed = newMsgs.slice(-CHAT_HISTORY_LIMIT);
       const resp = await callAI([{role:"user",content:ctx},{role:"assistant",content:"Understood, coaching tailored to this dancer."},...trimmed]);
       setChatMsgs(p=>[...p, {role:"assistant",content:resp}]);
-      update({aiChats:prog.aiChats+1, xp:prog.xp+2});
+      update(p=>({aiChats:p.aiChats+1, xp:p.xp+2}));
     } catch(e) {
-      setChatMsgs(p=>[...p,{role:"assistant",content:"Connection issue — please try again!"}]);
+      setChatMsgs(p=>[...p,{role:"assistant",content:e.message||"Connection issue — please try again!"}]);
     }
     setChatLoad(false);
   };
@@ -577,18 +643,18 @@ export default function App() {
       setCamOn(true); setUploadMode(false);
     } catch(e) { alert("Camera permission needed for live analysis."); }
   };
-  const stopCam = () => {
+  const stopCam = useCallback(() => {
     streamRef.current?.getTracks().forEach(t=>t.stop());
     streamRef.current = null; setCamOn(false);
-  };
+  }, []);
   const runAnalysis = async (b64) => {
     setAnalyzing(true);
     try {
       const r = await visionAI(b64);
       setAnalysis(r);
       const dk = localDate();
-      update({analysisCount:prog.analysisCount+1, xp:prog.xp+25,
-        dailyLog:{...prog.dailyLog,[dk]:{minutes:(prog.dailyLog?.[dk]?.minutes||0)+5, drills:(prog.dailyLog?.[dk]?.drills||0)}}});
+      update(p=>({analysisCount:p.analysisCount+1, xp:p.xp+25,
+        dailyLog:{...p.dailyLog,[dk]:{minutes:(p.dailyLog?.[dk]?.minutes||0)+5, drills:(p.dailyLog?.[dk]?.drills||0)}}}));
     } catch(e) {
       setAnalysis({scores:{posture:0,frame:0,alignment:0,balance:0,expression:0},overall:0,feedback:["Analysis failed — ensure you are well-lit and clearly visible."],strengths:[],priority:"Try again with better lighting"});
     }
@@ -612,7 +678,12 @@ export default function App() {
     };
     reader.readAsDataURL(file);
   };
-  useEffect(() => () => stopCam(), []);
+  useEffect(() => () => stopCam(), [stopCam]);
+  // Release the camera as soon as the user leaves the technique view
+  // (navigating away should never leave the webcam recording).
+  useEffect(() => {
+    if (tab !== "practice" || subView !== "technique") stopCam();
+  }, [tab, subView, stopCam]);
 
   // AI Drill — fixed: single merged update(), no duplicate dk
   const startDrill = async (dance, lvl, fig) => {
@@ -638,14 +709,15 @@ export default function App() {
     const dk = localDate();
     const drillXP = 10 + mins * 3;
     const fk = drillDance && drillFig ? figKey(drillDance.id, drillLvlRef.current, drillFig) : null;
-    const newFigs = fk && !prog.completedFigures[fk] ? {...prog.completedFigures,[fk]:true} : prog.completedFigures;
-    const bonusXP = fk && !prog.completedFigures[fk] ? 20 : 0;
-    update({
-      drillsCompleted: prog.drillsCompleted+1,
-      practiceMinutes: prog.practiceMinutes+mins,
-      completedFigures: newFigs,
-      xp: prog.xp + drillXP + bonusXP,
-      dailyLog: {...prog.dailyLog, [dk]:{minutes:(prog.dailyLog?.[dk]?.minutes||0)+mins, drills:(prog.dailyLog?.[dk]?.drills||0)+1}}
+    update(p => {
+      const firstTime = fk && !p.completedFigures[fk];
+      return {
+        drillsCompleted: p.drillsCompleted+1,
+        practiceMinutes: p.practiceMinutes+mins,
+        completedFigures: firstTime ? {...p.completedFigures,[fk]:true} : p.completedFigures,
+        xp: p.xp + drillXP + (firstTime ? 20 : 0),
+        dailyLog: {...p.dailyLog, [dk]:{minutes:(p.dailyLog?.[dk]?.minutes||0)+mins, drills:(p.dailyLog?.[dk]?.drills||0)+1}}
+      };
     });
     vibrate([30, 20, 60]);
   };
@@ -671,7 +743,7 @@ export default function App() {
     const correct = choice === quiz.correct;
     setQuizResult(correct ? "correct" : "wrong");
     vibrate(correct ? [30,20,60] : 80);
-    update({quizScore:{correct:(prog.quizScore?.correct||0)+(correct?1:0),total:(prog.quizScore?.total||0)+1}, xp:prog.xp+(correct?10:2)});
+    update(p=>({quizScore:{correct:(p.quizScore?.correct||0)+(correct?1:0),total:(p.quizScore?.total||0)+1}, xp:p.xp+(correct?10:2)}));
   };
 
   // Community
@@ -687,7 +759,7 @@ export default function App() {
     const newPost = {id:Date.now(), user_name:displayName, content:postIn.trim(), likes:0, liked_by:[], created_at:new Date().toISOString()};
     setPosts(prev=>[{...newPost,user:displayName,likedBy:[],time:newPost.created_at},...prev].slice(0,50));
     setPostIn("");
-    update({postsCount:prog.postsCount+1, xp:prog.xp+5});
+    update(p=>({postsCount:p.postsCount+1, xp:p.xp+5}));
     if (SUPA_URL) {
       await fetch(`${SUPA_URL}/rest/v1/community_posts`, {
         method:"POST",
@@ -720,7 +792,7 @@ export default function App() {
   const addToRoutine = (dance, lvl, fig) => {
     const item = {dance:dance.id, dName:dance.name, emoji:dance.emoji, level:lvl, fig, id:Date.now()};
     const newR = [...routine, item];
-    setRoutine(newR); update({routine:newR, xp:prog.xp+5});
+    setRoutine(newR); update(p=>({routine:newR, xp:p.xp+5}));
   };
   const removeFromRoutine = (id) => {
     const newR = routine.filter(r=>r.id!==id);
@@ -878,7 +950,7 @@ export default function App() {
                     {em:"🧠",l:"Quiz",        d:"Test your knowledge",  a:()=>navTo("practice","quiz")},
                     {em:"📸",l:"Analyze",     d:"Camera or photo",      a:()=>navTo("practice","technique")},
                   ].map((q,i)=>(
-                    <div key={i} className="gl card" onClick={q.a} style={{padding:14,animation:`fu .4s ease ${.15+i*.06}s both`}}>
+                    <div key={i} className="gl card" {...clickable(q.a, q.l)} style={{padding:14,animation:`fu .4s ease ${.15+i*.06}s both`}}>
                       <div style={{fontSize:26,marginBottom:5}}>{q.em}</div>
                       <div style={{fontSize:13,fontWeight:600,marginBottom:1}}>{q.l}</div>
                       <div style={{fontSize:12,color:"var(--txt3)"}}>{q.d}</div>
@@ -899,7 +971,7 @@ export default function App() {
                       {Object.values(DVIDA[cat]).map((d,i)=>{
                         const pct = dancePct(d);
                         return(
-                          <div key={d.id} className="card" onClick={()=>{setSelDance(d);setTab("syllabus");}}
+                          <div key={d.id} className="card" {...clickable(()=>{setSelDance(d);setTab("syllabus");}, `${d.name} syllabus`)}
                             style={{minWidth:110,borderRadius:16,padding:"16px 12px",textAlign:"center",background:`linear-gradient(145deg,${d.color}bb,${d.color}44)`,border:"1px solid var(--bdr)",animation:`si .4s ease ${i*.07}s both`,flexShrink:0}}>
                             <div style={{fontSize:30,marginBottom:5}}>{d.emoji}</div>
                             <div style={{fontSize:12,fontWeight:700}}>{d.name}</div>
@@ -928,7 +1000,7 @@ export default function App() {
                 {ALL_DANCES.filter(d=>styleFilter==="All"||d.style.includes(styleFilter)).map((d,i)=>{
                   const pct = dancePct(d);
                   return(
-                    <div key={d.id} className="card gl" onClick={()=>setSelDance(d)}
+                    <div key={d.id} className="card gl" {...clickable(()=>setSelDance(d), `${d.name} — ${pct}% complete`)}
                       style={{padding:14,marginBottom:8,display:"flex",gap:12,alignItems:"center",animation:`fu .35s ease ${i*.05}s both`,borderLeft:`3px solid ${d.color}`}}>
                       <div style={{fontSize:32,flexShrink:0}}>{d.emoji}</div>
                       <div style={{flex:1}}>
@@ -973,7 +1045,7 @@ export default function App() {
                   const unlocked = isLevelUnlocked(selDance.id,lvl,prog);
                   const colors = ["var(--grn)","var(--gold)","var(--blu)","var(--purp)"];
                   return(
-                    <div key={lvl} onClick={()=>unlocked&&setSelLevel(lvl)}
+                    <div key={lvl} {...(unlocked?clickable(()=>setSelLevel(lvl), `${lvl} — ${Math.round(pct*100)}% complete`):{"aria-label":`${lvl} locked`,"aria-disabled":true})}
                       className={unlocked?"gl card":"gl"} style={{padding:14,marginBottom:9,opacity:unlocked?1:.45,cursor:unlocked?"pointer":"not-allowed",borderLeft:`3px solid ${colors[li]}`}}>
                       <div style={{display:"flex",alignItems:"center",gap:10}}>
                         <div style={{flex:1}}>
@@ -1069,7 +1141,7 @@ export default function App() {
                 <div style={{display:"flex",gap:7}}>
                   <input value={chatIn} onChange={e=>setChatIn(e.target.value)} onKeyDown={e=>e.key==="Enter"&&sendChat()} placeholder="Ask about any DVIDA figure..."
                     style={{flex:1,padding:"11px 14px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt)",fontSize:13}}/>
-                  <button className="btn" onClick={sendChat} disabled={chatLoad||!chatIn.trim()}
+                  <button className="btn" aria-label="Send message" onClick={sendChat} disabled={chatLoad||!chatIn.trim()}
                     style={{width:42,height:42,background:chatIn.trim()?"linear-gradient(135deg,var(--gold),#a08030)":"var(--s1)",color:chatIn.trim()?"var(--bg)":"var(--txt3)",display:"flex",alignItems:"center",justifyContent:"center"}}>
                     {ic(Ic.Send,16)}
                   </button>
@@ -1124,7 +1196,7 @@ export default function App() {
                         </button>
                       ))}
                     </div>
-                    <button className="btn" onClick={()=>{if(met.on)met.stop();else{met.start();update({metronomeSessions:prog.metronomeSessions+1});}}}
+                    <button className="btn" onClick={()=>{if(met.on)met.stop();else{met.start();update(p=>({metronomeSessions:p.metronomeSessions+1}));}}}
                       style={{width:60,height:60,borderRadius:"50%",background:met.on?"rgba(207,107,107,.2)":"linear-gradient(135deg,var(--gold),#a08030)",color:"#fff",display:"flex",alignItems:"center",justifyContent:"center",margin:"0 auto",boxShadow:`0 0 20px ${met.on?"rgba(207,107,107,.15)":"rgba(201,168,76,.2)"}`}}>
                       {met.on?ic(Ic.Pause):ic(Ic.Play)}
                     </button>
@@ -1283,7 +1355,7 @@ export default function App() {
                         </div>
                         <div style={{display:"flex",gap:9,justifyContent:"center"}}>
                           <button className="btn" onClick={captureFromCamera} disabled={analyzing} style={{padding:"10px 22px",background:"linear-gradient(135deg,var(--gold),#a08030)",color:"var(--bg)",fontSize:12,opacity:analyzing?0.5:1}}>Analyze Now</button>
-                          <button className="btn" onClick={stopCam} style={{padding:"10px 18px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt2)",fontSize:12}}>{ic(Ic.X,14)} Close</button>
+                          <button className="btn" aria-label="Close camera" onClick={stopCam} style={{padding:"10px 18px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt2)",fontSize:12}}>{ic(Ic.X,14)} Close</button>
                         </div>
                       </>
                     ):(
@@ -1346,7 +1418,7 @@ export default function App() {
                                   <div style={{fontSize:13,fontWeight:600}}>{r.fig}</div>
                                   <div style={{fontSize:12,color:"var(--txt3)"}}>{r.dName} · {r.level}</div>
                                 </div>
-                                <button className="btn" onClick={()=>removeFromRoutine(r.id)} style={{background:"none",color:"var(--red)",padding:4}}>{ic(Ic.Trash,14)}</button>
+                                <button className="btn" aria-label={`Remove ${r.fig} from routine`} onClick={()=>removeFromRoutine(r.id)} style={{background:"none",color:"var(--red)",padding:4}}>{ic(Ic.Trash,14)}</button>
                               </div>
                             ))}
                           </div>
@@ -1443,7 +1515,7 @@ export default function App() {
               <div style={{padding:"44px 18px 12px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
                   <h1 style={{fontFamily:"var(--serif)",fontSize:26}}><span className="gold">Community</span></h1>
-                  <button className="btn" onClick={reloadPosts} style={{background:"none",color:"var(--txt3)",padding:4}}>{ic(Ic.Refresh,16)}</button>
+                  <button className="btn" aria-label="Refresh posts" onClick={reloadPosts} style={{background:"none",color:"var(--txt3)",padding:4}}>{ic(Ic.Refresh,16)}</button>
                 </div>
                 <p style={{fontSize:11,color:"var(--txt3)"}}>Real-time · Shared across all dancers{prog.userName?` · Posting as ${prog.userName}`:""}</p>
               </div>
@@ -1472,7 +1544,7 @@ export default function App() {
                       </div>
                     </div>
                     <div style={{fontSize:12,color:"var(--txt2)",lineHeight:1.6,marginBottom:8}}>{p.content}</div>
-                    <button className="btn" onClick={()=>likePost(p.id)}
+                    <button className="btn" aria-label={`Like — ${p.likes} likes`} aria-pressed={(p.likedBy||[]).includes(getUserId(prog))} onClick={()=>likePost(p.id)}
                       style={{background:"none",color:"var(--txt3)",fontSize:11,display:"flex",alignItems:"center",gap:4,padding:0}}>
                       <span style={{color:(p.likedBy||[]).includes(getUserId(prog))?"var(--red)":"var(--txt3)"}}>{ic(Ic.Heart,13)}</span>{p.likes}
                     </button>

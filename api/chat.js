@@ -1,28 +1,37 @@
 // Vercel Serverless Function — proxies Anthropic /v1/messages
-// API key never leaves the server; CORS locked to same origin
+// API key never leaves the server; origin-locked + rate-limited via _guard.
+
+import { guard } from './_guard.js';
+
+const MAX_MESSAGES = 24;        // cap conversation length sent upstream
+const MAX_TOKENS_CAP = 1500;    // never let a caller request more than this
+const MAX_CHARS = 24_000;       // rough cap on total prompt size
 
 export default async function handler(req, res) {
-  // Only allow POST
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
+  if (!guard(req, res)) return;
 
-  // Basic rate limit via Vercel Edge (add Upstash Redis for production rate limiting)
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) {
     return res.status(500).json({ error: 'Server misconfigured — API key missing' });
   }
 
   try {
-    const { messages, system, max_tokens = 1000 } = req.body;
+    const { messages, system, max_tokens = 1000 } = req.body || {};
 
-    if (!messages || !Array.isArray(messages)) {
+    if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'messages array required' });
+    }
+    if (messages.length > MAX_MESSAGES) {
+      return res.status(400).json({ error: 'Too many messages' });
+    }
+    const totalChars = JSON.stringify(messages).length + (system ? system.length : 0);
+    if (totalChars > MAX_CHARS) {
+      return res.status(413).json({ error: 'Prompt too large' });
     }
 
     const body = {
       model: 'claude-sonnet-4-20250514',
-      max_tokens,
+      max_tokens: Math.min(Number(max_tokens) || 1000, MAX_TOKENS_CAP),
       messages,
     };
     if (system) body.system = system;
