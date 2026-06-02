@@ -7,6 +7,13 @@ const MAX_MESSAGES = 24;        // cap conversation length sent upstream
 const MAX_TOKENS_CAP = 1500;    // never let a caller request more than this
 const MAX_CHARS = 24_000;       // rough cap on total prompt size
 
+// Callers pick a tier by name; ids stay server-side. 'fast' (Haiku) is used for
+// cheap, structured tasks (quiz blurbs, drills); 'smart' (Sonnet) for coaching.
+const MODELS = {
+  smart: 'claude-sonnet-4-20250514',
+  fast: 'claude-haiku-4-5-20251001',
+};
+
 export default async function handler(req, res) {
   if (!guard(req, res)) return;
 
@@ -16,7 +23,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { messages, system, max_tokens = 1000 } = req.body || {};
+    const { messages, system, max_tokens = 1000, model = 'smart' } = req.body || {};
 
     if (!Array.isArray(messages) || messages.length === 0) {
       return res.status(400).json({ error: 'messages array required' });
@@ -30,7 +37,7 @@ export default async function handler(req, res) {
     }
 
     const body = {
-      model: 'claude-sonnet-4-20250514',
+      model: MODELS[model] || MODELS.smart,
       max_tokens: Math.min(Number(max_tokens) || 1000, MAX_TOKENS_CAP),
       messages,
     };

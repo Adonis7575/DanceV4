@@ -3,6 +3,7 @@ node_modules/
 
 # Build output
 dist/
+dev-dist/
 
 # Local env
 .env
@@ -14,3 +15,8 @@ dist/
 
 # Vercel
 .vercel
+
+# Unrelated nested sub-projects in this workspace root
+DanceV2/
+DanceV4/
+dancecoach-live/

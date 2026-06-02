@@ -30,144 +30,11 @@ const Ic = {
 };
 const ic = (C, s=20) => <C style={{width:s,height:s}}/>;
 
-/* ══════════════════════════════════════════════
-   DVIDA BRONZE SYLLABUS
-══════════════════════════════════════════════ */
-const DVIDA = {
-  smooth: {
-    waltz:    { id:"waltz",    name:"Waltz",           style:"American Smooth", emoji:"🌙", color:"#1a3a5c", bpm:84,  tempo:"3/4", timing:"1-2-3",           level:"beginner",     desc:"Elegant flowing dance in 3/4 time with rise & fall", songs:["Moon River","La Vie En Rose","Can't Help Falling in Love","A Thousand Years","The Way You Look Tonight"], levels:{ "Bronze I":["Box Step (Straight)","Box with Underarm Turn","Progressive","Left Turning Box","Right Turning Box"], "Bronze II":["Balance Steps","Balance and Box","Simple Twinkle","Two-Way Underarm Turn","Face to Face / Back to Back"], "Bronze III":["Reverse Turn","Natural Turn","Progressive Twinkles","Turning Twinkles"], "Full Bronze":["Grapevine","Promenade Chassé","Fallaway and Box","Twinkle and Weave"] }},
-    foxtrot:  { id:"foxtrot",  name:"Foxtrot",         style:"American Smooth", emoji:"🎩", color:"#2d1b4e", bpm:120, tempo:"4/4", timing:"Slow-Quick-Quick", level:"intermediate", desc:"Smooth progressive movement across the floor",           songs:["Fly Me to the Moon","The Way You Look Tonight","Cheek to Cheek","Isn't She Lovely","Come Fly With Me"],   levels:{ "Bronze I":["Basic","Promenade","Rock Turn to Left","Rock Turn to Right"], "Bronze II":["Sway Step","Promenade Underarm Turn","Sway Underarm Turn","Zig Zag In Line","Zig Zag Outside Partner","Box Step"], "Bronze III":["Twinkle","Fallaway Twinkles","Promenade Twinkles","Turning Twinkles to Outside Partner"], "Full Bronze":["Grapevine","Promenade Twist","Promenade Pivot","Running Steps in Basic Rhythm","Running Steps in Box Rhythm"] }},
-    tango:    { id:"tango",    name:"Tango",            style:"American Smooth", emoji:"🌹", color:"#5c1a1a", bpm:132, tempo:"2/4", timing:"S-S-Q-Q-S",        level:"intermediate", desc:"Sharp staccato movement with dramatic flair",            songs:["La Cumparsita","Por Una Cabeza","El Choclo","Roxanne (Tango)","Libertango"],                             levels:{ "Bronze I":["Straight Basic","Curving Basic","Promenade Turning Left","Promenade Turning Right","Single Corté","Double Corté"], "Bronze II":["Progressive Rocks","Open Fan","Open Fan with Underarm Turn","Running Steps","Checked Promenade"], "Bronze III":["Reverse Turn","Reverse Turn with Outside Swivel","Right Side Fans","Contra Rocks","Continuous Left Rock Turn"], "Full Bronze":["Twist Turn to the Right","Check and Corté","Promenade Pivot","Oversway"] }},
-    vwaltz:   { id:"vwaltz",   name:"Viennese Waltz",  style:"American Smooth", emoji:"💫", color:"#0d3b3b", bpm:180, tempo:"3/4", timing:"1-2-3",           level:"advanced",     desc:"Fast continuous turning waltz",                          songs:["The Blue Danube","Edelweiss","An der schönen blauen Donau","Kiss Me","Vienna"],                         levels:{ "Bronze I":["Balance Steps","Fifth Position Breaks","Fifth Position Breaks with Underarm Turn"], "Bronze II":["Reverse Turn","Closed Twinkle"], "Bronze III":["Crossbody Lead","Crossbody Lead with Underarm Turn","Hand to Hand","Forward Progressive Changes","Backward Progressive Changes"], "Full Bronze":["Right Turn","Change of Place","Curtsey & Bow"] }},
-  },
-  rhythm: {
-    rumba:  { id:"rumba",  name:"Rumba",           style:"American Rhythm", emoji:"❤️", color:"#4a0e2e", bpm:100, tempo:"4/4", timing:"2-3-4-1",        level:"beginner",     desc:"Slow romantic dance of love through Cuban motion", songs:["Could You Be Loved","Smooth","Quizás Quizás Quizás","Bésame Mucho","Island in the Sun"],       levels:{ "Bronze I":["Side Basic","Fifth Position","Box Step"], "Bronze II":["Cross Body Lead","Outside Partner","Slow Underarm Turn","Open Break Underarm Turn"], "Bronze III":["Crossover Break","Crossover & Side Rocks","Open Rumba Walks","Turning Twinkles"], "Full Bronze":["Cradle Circle","Quick Underarm Turn & Loop","Open Circular Walks","Spot Turn Combination"] }},
-    chacha: { id:"chacha", name:"Cha-Cha",         style:"American Rhythm", emoji:"💃", color:"#5c3a1a", bpm:120, tempo:"4/4", timing:"2-3-cha-cha-1", level:"beginner",     desc:"Playful, flirtatious Cuban rhythm",                songs:["Oye Como Va","Smooth","La Vida Es Un Carnaval","Conga","Mambo No. 5"],                           levels:{ "Bronze I":["Basics in Place","Side Basic","Progressive Basic"], "Bronze II":["Outside Partner","Crossover Break","Cross Body Lead","Open Break & Underarm Turn"], "Bronze III":["Chase Turn","Shoulder Check","Shadow Positions","Butterfly"], "Full Bronze":["Alternating Underarm Turns","Cross Body Pull Back","Three Cha Chas","Crossover Flick to Side Break"] }},
-    ecs:    { id:"ecs",    name:"East Coast Swing", style:"American Rhythm", emoji:"🕺", color:"#1a4a1a", bpm:176, tempo:"4/4", timing:"1-2-rock-step",  level:"beginner",     desc:"High-energy bouncy swing dance",                   songs:["Rock Around the Clock","Johnny B. Goode","Jump Jive an' Wail","Sing Sing Sing","In the Mood"],   levels:{ "Bronze I":["Basic","Basic Turning Right","Basic Turning Left","Throwout"], "Bronze II":["Underarm Turn","Underarm Release from Basic","Tuck In – Handshake","Tuck In – Double Handhold with Free Spin","Tuck In – Double Handhold with Underarm Turn"], "Bronze III":["Alternating Underarm Turns","Shoulder Check","Cradle","Cradle to Hammerlock"], "Full Bronze":["Sugar Push Throw Out","Double Face Loop","Opposition Break & Roll Out","Whirlpool"] }},
-    samba:  { id:"samba",  name:"Samba",            style:"American Rhythm", emoji:"🎭", color:"#4a3a0e", bpm:100, tempo:"2/4", timing:"1-a-2",          level:"intermediate", desc:"Rhythmic Brazilian carnival dance",                songs:["The Girl from Ipanema","Mas Que Nada","Brazil","Samba de Janeiro","Livin' la Vida Loca"],          levels:{ "Bronze I":["Basic Bounce (exercise)","Forward & Back Basic","Side to Side Basic"], "Bronze II":["Fifth Position","The Box","Extended Box","Samba Walks"], "Bronze III":["Forward & Back Spiral","Reverse Samba Walk","Promenade & Counter Promenade Bota Fogos","Opening Out Left & Right"], "Full Bronze":["Rolling Box","Volta to Left & Right","Open Break","Advanced Left Turn"] }},
-    bolero: { id:"bolero", name:"Bolero",           style:"American Rhythm", emoji:"🕯️", color:"#3a1a4a", bpm:96,  tempo:"4/4", timing:"Slow-Quick-Quick",level:"intermediate", desc:"Slowest and most romantic Rhythm dance",           songs:["Bésame Mucho","Perhaps Perhaps Perhaps","Quizás Quizás Quizás","Sabor a Mí","Historia de un Amor"], levels:{ "Bronze I":["Basic Movement","Open Break Underarm Turn"], "Bronze II":["Underarm Pass","Left Side Pass"], "Bronze III":["Crossover Break","Check & Circular Walks","Romantic Sways"], "Full Bronze":["Checked Underarm Pass","Spot Turn Combination","Hip Twist & Spin"] }},
-    mambo:  { id:"mambo",  name:"Mambo",            style:"American Rhythm", emoji:"🥁", color:"#4a1a1a", bpm:188, tempo:"4/4", timing:"2-3-4-1",        level:"intermediate", desc:"Fiery staccato Cuban dance",                       songs:["Mambo No. 5","Oye Como Va","Guantanamera","Tequila","Ran Kan Kan"],                               levels:{ "Bronze I":["Forward & Back Basic","Side Breaks","Side Breaks & Cross"], "Bronze II":["Cross Body Lead","Open Break Underarm Turn","Crossover Break & Walk Around","Shoulder Check"], "Bronze III":["Promenade Swivel & Close","Alternating Underarm Turns","Rueda Basic","Cross Body Lead with Inside Turn"], "Full Bronze":["Back Spot Turn","Mambo Twist","Forward Spot Turn to Surprise","Crossover Swivels & Pullback"] }},
-  }
-};
-
-const ALL_DANCES = [...Object.values(DVIDA.smooth), ...Object.values(DVIDA.rhythm)];
-const BRONZE_LEVELS = ["Bronze I","Bronze II","Bronze III","Full Bronze"];
-const UNLOCK_THRESHOLD = 0.8;
-const CHAT_HISTORY_LIMIT = 10; // max messages sent to API
-
-/* ══════════════════════════════════════════════
-   API HELPERS
-══════════════════════════════════════════════ */
-const SUPA_URL = import.meta.env.VITE_SUPABASE_URL || "";
-const SUPA_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
-
-const SYSTEM = `You are an elite DVIDA-certified ballroom dance coach specializing in American Smooth (Waltz, Foxtrot, Tango, Viennese Waltz) and American Rhythm (Rumba, Cha-Cha, East Coast Swing, Samba, Bolero, Mambo). You follow the DVIDA Bronze syllabus precisely.
-Your personality: Warm, encouraging, technically precise, passionate. Give specific, actionable feedback using correct DVIDA terminology. Be concise — dancers read on mobile between sessions.`;
-
-// Fetch with an abort timeout so a stalled request never hangs the UI forever.
-async function fetchJSON(url, payload, timeoutMs=30000) {
-  const ctrl = new AbortController();
-  const t = setTimeout(() => ctrl.abort(), timeoutMs);
-  try {
-    const r = await fetch(url, {
-      method:"POST", headers:{"Content-Type":"application/json"},
-      body: JSON.stringify(payload), signal: ctrl.signal,
-    });
-    let d = null;
-    try { d = await r.json(); } catch { /* non-JSON body */ }
-    if (!r.ok) throw new Error(d?.error || `Request failed (${r.status})`);
-    if (d?.error) throw new Error(d.error);
-    return d;
-  } catch (e) {
-    if (e.name === "AbortError") throw new Error("Request timed out — please try again.");
-    throw e;
-  } finally {
-    clearTimeout(t);
-  }
-}
-
-async function callAI(messages, sys=SYSTEM, max=1000) {
-  const d = await fetchJSON("/api/chat", { messages, system:sys, max_tokens:max });
-  return d.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n") || "";
-}
-
-async function visionAI(b64) {
-  return fetchJSON("/api/vision", { imageData:b64 });
-}
-
-/* ══════════════════════════════════════════════
-   STORAGE
-══════════════════════════════════════════════ */
-const load = async (k, shared=false) => {
-  try {
-    if (shared) {
-      if (!SUPA_URL) return null;
-      const r = await fetch(`${SUPA_URL}/rest/v1/community_posts?order=created_at.desc&limit=50`, {
-        headers: { apikey:SUPA_KEY, Authorization:`Bearer ${SUPA_KEY}` }
-      });
-      return r.ok ? r.json() : null;
-    }
-    const v = localStorage.getItem(k);
-    return v ? JSON.parse(v) : null;
-  } catch(e) { return null; }
-};
-
-const save = async (k, v, shared=false) => {
-  try {
-    if (shared) return;
-    localStorage.setItem(k, JSON.stringify(v));
-  } catch(e) {}
-};
-
-/* ══════════════════════════════════════════════
-   PROGRESS DEFAULTS & BADGES
-══════════════════════════════════════════════ */
-const DEF = {
-  xp:0, level:1, streak:0, lastPractice:null, userName:"",
-  completedFigures:{}, earnedBadges:[], drillsCompleted:0,
-  metronomeSessions:0, postsCount:0, practiceMinutes:0,
-  aiChats:0, analysisCount:0, articlesRead:0,
-  quizScore:{correct:0, total:0}, dailyLog:{}, routine:[],
-  dailyGoalMinutes:15, challengeDoneDate:null,
-  onboarded:false,
-};
-
-function pctLevel(danceId, lvl, prog) {
-  const dance = ALL_DANCES.find(d=>d.id===danceId);
-  if (!dance) return 0;
-  const figs = dance.levels[lvl] || [];
-  if (!figs.length) return 0;
-  return figs.filter(f=>prog.completedFigures[`${danceId}::${lvl}::${f}`]).length / figs.length;
-}
-
-function isLevelUnlocked(danceId, lvl, prog) {
-  const idx = BRONZE_LEVELS.indexOf(lvl);
-  if (idx === 0) return true;
-  return pctLevel(danceId, BRONZE_LEVELS[idx-1], prog) >= UNLOCK_THRESHOLD;
-}
-
-// Stable UID based on first practice date (set once, never changes)
-function getUserId(prog) {
-  return `dancer-${prog.lastPractice || "new"}-${Object.keys(prog.completedFigures).length}`;
-}
-
-const BADGES = [
-  {id:"first",       name:"First Step",     icon:"👣", desc:"Complete your first figure",       check:p=>Object.keys(p.completedFigures).length>=1},
-  {id:"bronze1_waltz",name:"Waltz Bronze I", icon:"🌙", desc:"Complete all Waltz Bronze I",      check:p=>pctLevel("waltz","Bronze I",p)>=1},
-  {id:"bronze1_tango",name:"Tango Bronze I", icon:"🌹", desc:"Complete all Tango Bronze I",      check:p=>pctLevel("tango","Bronze I",p)>=1},
-  {id:"bronze1_cha",  name:"Cha-Cha Bronze I",icon:"💃",desc:"Complete all Cha-Cha Bronze I",   check:p=>pctLevel("chacha","Bronze I",p)>=1},
-  {id:"bronze1_rumba",name:"Rumba Bronze I", icon:"❤️", desc:"Complete all Rumba Bronze I",     check:p=>pctLevel("rumba","Bronze I",p)>=1},
-  {id:"streak3",     name:"Hat Trick",       icon:"🔥", desc:"3-day practice streak",           check:p=>p.streak>=3},
-  {id:"streak7",     name:"Weekly Warrior",  icon:"⚔️", desc:"7-day practice streak",           check:p=>p.streak>=7},
-  {id:"drills10",    name:"Drill Master",    icon:"💪", desc:"Complete 10 drills",              check:p=>p.drillsCompleted>=10},
-  {id:"quiz20",      name:"Scholar",         icon:"🎓", desc:"Answer 20 quiz questions",        check:p=>(p.quizScore?.total||0)>=20},
-  {id:"quiz80",      name:"Ace",             icon:"🏅", desc:"80%+ quiz accuracy (min 10)",     check:p=>(p.quizScore?.total||0)>=10&&((p.quizScore?.correct||0)/(p.quizScore?.total||1))>=0.8},
-  {id:"routine",     name:"Choreographer",   icon:"🎬", desc:"Build a 5+ figure routine",       check:p=>p.routine.length>=5},
-  {id:"community",   name:"Social Dancer",   icon:"🦋", desc:"Post in the community",           check:p=>p.postsCount>=1},
-  {id:"analysis3",   name:"Self-Aware",      icon:"📸", desc:"Complete 3 analyses",             check:p=>p.analysisCount>=3},
-  {id:"fullbronze",  name:"Full Bronze",     icon:"🥇", desc:"Complete any Full Bronze level",  check:p=>ALL_DANCES.some(d=>pctLevel(d.id,"Full Bronze",p)>=1)},
-  {id:"century",     name:"Centurion",       icon:"💎", desc:"Earn 100 XP",                     check:p=>p.xp>=100},
-];
+import { DVIDA, ALL_DANCES, BRONZE_LEVELS, CHAT_HISTORY_LIMIT } from "./data/dvida.js";
+import { DEF, localDate, levelFromXp, figKey, dancePct, isLevelUnlocked, getUserId } from "./lib/scoring.js";
+import { BADGES } from "./lib/badges.js";
+import { callAI, visionAI, describeFigure } from "./lib/api.js";
+import { SUPA_URL, SUPA_KEY, load, save } from "./lib/storage.js";
 
 /* ══════════════════════════════════════════════
    METRONOME HOOK
@@ -238,7 +105,7 @@ function useMet() {
    CSS — injected once at top level
 ══════════════════════════════════════════════ */
 const CSS = `
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Outfit:wght@300;400;500;600;700&display=swap');
+/* Fonts are loaded via <link rel="preconnect"> + stylesheet in index.html. */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
   --bg:#0d1018;         /* slightly lighter near-black — more contrast base   */
@@ -272,15 +139,14 @@ body{background:var(--bg);color:var(--txt);font-family:var(--sans);-webkit-font-
 .card:active{transform:scale(.97)}
 .spin{width:18px;height:18px;border:2px solid var(--bdr);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite;display:inline-block}
 input,textarea{font-family:var(--sans);outline:none;border-radius:var(--r)}
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+}
 `;
 
 /* ══════════════════════════════════════════════
    HELPERS — defined outside App (stable refs)
 ══════════════════════════════════════════════ */
-const localDate = () => {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
-};
 const fmtT = s => `${Math.floor(s/60)}:${(s%60).toString().padStart(2,"0")}`;
 const ago = iso => {
   const d = (Date.now()-new Date(iso))/1000;
@@ -344,6 +210,8 @@ function BadgeToast({badge, onDone}) {
     vibrate(100);
     const t = setTimeout(onDone, 3200);
     return () => clearTimeout(t);
+    // mount-only: the toast auto-dismisses once; onDone is stable for its lifetime
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <div onClick={onDone} style={{position:"fixed",top:60,left:"50%",transform:"translateX(-50%)",zIndex:9999,maxWidth:320,width:"calc(100% - 36px)",animation:"slideUp .4s ease"}}>
@@ -487,6 +355,7 @@ export default function App() {
   const [uploadMode, setUploadMode] = useState(false);
   const vidRef = useRef(null), canvRef = useRef(null), streamRef = useRef(null);
   const fileRef = useRef(null);
+  const importRef = useRef(null);
 
   // Drill
   const [drillOn, setDrillOn] = useState(false);
@@ -560,7 +429,7 @@ export default function App() {
     setProg(prev => {
       const changes = typeof changesOrFn === "function" ? changesOrFn(prev) : changesOrFn;
       const next = {...prev, ...changes};
-      next.level = Math.floor(next.xp / 100) + 1;
+      next.level = levelFromXp(next.xp);
       const today = localDate();
       const yest = new Date(Date.now()-86400000).toLocaleDateString("sv-SE");
       if (next.lastPractice !== today) {
@@ -579,18 +448,8 @@ export default function App() {
   }, []);
 
   const navTo = (t, sv) => { setTab(t); setSelDance(null); setSelLevel(null); if(sv) setSubView(sv); };
-  const figKey = (dId,lvl,fig) => `${dId}::${lvl}::${fig}`;
+  // figKey/dancePct/isLevelUnlocked/pctLevel are pure imports from lib/scoring.
   const isFigDone = (dId,lvl,fig) => !!prog.completedFigures[figKey(dId,lvl,fig)];
-  const figPct = (dance, lvl) => {
-    const figs = dance.levels[lvl] || [];
-    if (!figs.length) return 0;
-    return figs.filter(f=>prog.completedFigures[figKey(dance.id,lvl,f)]).length / figs.length;
-  };
-  const dancePct = dance => {
-    const all = Object.values(dance.levels).flat();
-    const done = all.filter(f=>BRONZE_LEVELS.some(lvl=>prog.completedFigures[figKey(dance.id,lvl,f)])).length;
-    return Math.round((done/all.length)*100);
-  };
 
   const completeFig = (dance, lvl, fig) => {
     const key = figKey(dance.id, lvl, fig);
@@ -694,7 +553,7 @@ export default function App() {
     if (drillIv.current) clearInterval(drillIv.current);
     drillIv.current = setInterval(() => setDrillSec(s=>s+1), 1000);
     try {
-      const r = await callAI([{role:"user",content:`Create a focused DVIDA Bronze practice drill for the "${fig}" in ${dance.name} (${dance.style}), ${lvl}. Dancer: Level ${prog.level}, ${Object.keys(prog.completedFigures).length} figures done.\n\nReturn ONLY valid JSON:\n{"warmup":"2 sentence warmup","steps":["step1","step2","step3","step4","step5"],"count":"exact timing/count","dvida_note":"one key DVIDA technique point","mistakes":["mistake1","mistake2"],"visualization":"mental image","song_tempo":"${dance.bpm} BPM suggestion"}`}]);
+      const r = await callAI([{role:"user",content:`Create a focused DVIDA Bronze practice drill for the "${fig}" in ${dance.name} (${dance.style}), ${lvl}. Dancer: Level ${prog.level}, ${Object.keys(prog.completedFigures).length} figures done.\n\nReturn ONLY valid JSON:\n{"warmup":"2 sentence warmup","steps":["step1","step2","step3","step4","step5"],"count":"exact timing/count","dvida_note":"one key DVIDA technique point","mistakes":["mistake1","mistake2"],"visualization":"mental image","song_tempo":"${dance.bpm} BPM suggestion"}`}], undefined, 1000, "fast");
       setDrillPlan(JSON.parse(r.replace(/```json|```/g,"").trim()));
     } catch(e) {
       setDrillPlan({warmup:`Begin with slow ${dance.name} walks in ${dance.tempo} time.`,steps:["Walk through without music","Count aloud","Half tempo","Full tempo","Performance run"],count:dance.timing,dvida_note:`DVIDA ${lvl} figure — focus on the syllabus requirement.`,mistakes:["Rushing footwork","Dropping frame"],visualization:"Move smoothly and deliberately.",song_tempo:`${dance.bpm} BPM`});
@@ -733,7 +592,7 @@ export default function App() {
     const choices = shuffle([correct, ...shuffle(others).slice(0,3)]);
     setQuiz({dance, lvl, choices, correct});
     try {
-      const exp = await callAI([{role:"user",content:`In 2 sentences, describe the DVIDA Bronze "${correct}" in ${dance.name} — what it looks like and one key technique point. Be specific.`}]);
+      const exp = await describeFigure(dance, correct); // cached + cheap (Haiku)
       setQuizExplain(exp);
     } catch(e) { setQuizExplain(`The ${correct} is a ${lvl} figure in ${dance.name}.`); }
     setQuizLoad(false);
@@ -756,16 +615,26 @@ export default function App() {
     if (!postIn.trim()) return;
     setPostLoad(true);
     const displayName = prog.userName || `Dancer_${Math.floor(Math.random()*900)+100}`;
-    const newPost = {id:Date.now(), user_name:displayName, content:postIn.trim(), likes:0, liked_by:[], created_at:new Date().toISOString()};
-    setPosts(prev=>[{...newPost,user:displayName,likedBy:[],time:newPost.created_at},...prev].slice(0,50));
+    const content = postIn.trim().slice(0, 500); // matches DB CHECK constraint
+    // Optimistic post with a temp id; reconciled with the DB row (real UUID) below.
+    const tempId = `temp-${Date.now()}`;
+    setPosts(prev=>[{id:tempId, user:displayName, content, likes:0, likedBy:[], liked_by:[], time:new Date().toISOString()},...prev].slice(0,50));
     setPostIn("");
     update(p=>({postsCount:p.postsCount+1, xp:p.xp+5}));
     if (SUPA_URL) {
-      await fetch(`${SUPA_URL}/rest/v1/community_posts`, {
-        method:"POST",
-        headers:{apikey:SUPA_KEY,Authorization:`Bearer ${SUPA_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},
-        body:JSON.stringify(newPost)
-      }).catch(e=>console.warn("Post failed:",e));
+      try {
+        // Send only the columns anon is allowed to write; ask for the row back
+        // so we can swap the temp id for the database-generated UUID.
+        const r = await fetch(`${SUPA_URL}/rest/v1/community_posts`, {
+          method:"POST",
+          headers:{apikey:SUPA_KEY,Authorization:`Bearer ${SUPA_KEY}`,"Content-Type":"application/json",Prefer:"return=representation"},
+          body:JSON.stringify({user_name:displayName, content})
+        });
+        if (r.ok) {
+          const [row] = await r.json();
+          if (row) setPosts(prev=>prev.map(p=>p.id!==tempId?p:{...p, id:row.id, time:row.created_at}));
+        }
+      } catch(e) { console.warn("Post failed:", e); }
     }
     setPostLoad(false);
   };
@@ -779,7 +648,7 @@ export default function App() {
     const newLikes = has ? post.likes-1 : post.likes+1;
     const newLikedBy = has ? liked.filter(u=>u!==uid) : [...liked,uid];
     setPosts(prev=>prev.map(p=>p.id!==id?p:{...p,likes:newLikes,likedBy:newLikedBy,liked_by:newLikedBy}));
-    if (SUPA_URL) {
+    if (SUPA_URL && !String(id).startsWith("temp-")) {
       await fetch(`${SUPA_URL}/rest/v1/community_posts?id=eq.${id}`, {
         method:"PATCH",
         headers:{apikey:SUPA_KEY,Authorization:`Bearer ${SUPA_KEY}`,"Content-Type":"application/json",Prefer:"return=minimal"},
@@ -806,6 +675,37 @@ export default function App() {
       const r = await callAI([{role:"user",content:`Competition routine:\n${figList}\n\nBrief coaching note: flow, transitions, timing/technique watch-outs. Under 150 words.`}]);
       setShareRoutine(r);
     } catch(e) { setShareRoutine("Could not generate notes — please try again."); }
+  };
+
+  // ── Data portability — localStorage is the only home for personal progress,
+  // so give the user a way to back it up, move devices, and start over. ──
+  const exportData = () => {
+    const blob = new Blob([JSON.stringify(prog, null, 2)], {type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `dance-coach-progress-${localDate()}.json`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+  const importData = (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // allow re-importing the same file
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (ev) => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if (!data || typeof data !== "object") throw new Error("bad file");
+        const next = {...DEF, ...data, quizScore:{...DEF.quizScore, ...(data.quizScore||{})}};
+        setProg(next); setRoutine(next.routine || []); save("dvida-prog-v4", next);
+        alert("Progress imported ✓");
+      } catch { alert("Could not read that file — is it a Dance Coach backup?"); }
+    };
+    reader.readAsText(file);
+  };
+  const resetData = () => {
+    if (!window.confirm("Reset all progress? This clears XP, streaks, figures and badges on this device. Export a backup first if you want to keep it.")) return;
+    const next = {...DEF, onboarded:true, userName:prog.userName};
+    setProg(next); setRoutine([]); save("dvida-prog-v4", next);
   };
 
   // Computed
@@ -840,6 +740,7 @@ export default function App() {
       <div style={{background:"var(--bg)",minHeight:"100vh",maxWidth:480,margin:"0 auto",position:"relative"}}>
         <canvas ref={canvRef} style={{display:"none"}}/>
         <input ref={fileRef} type="file" accept="image/*" style={{display:"none"}} onChange={handleFileUpload}/>
+        <input ref={importRef} type="file" accept="application/json,.json" style={{display:"none"}} onChange={importData}/>
         {/* Badge toast */}
         {toastBadge && <BadgeToast badge={toastBadge} onDone={()=>setToastBadge(null)}/>}
         {/* Ambient glow */}
@@ -969,7 +870,7 @@ export default function App() {
                     </div>
                     <div style={{display:"flex",gap:9,overflowX:"auto",paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
                       {Object.values(DVIDA[cat]).map((d,i)=>{
-                        const pct = dancePct(d);
+                        const pct = dancePct(d, prog);
                         return(
                           <div key={d.id} className="card" {...clickable(()=>{setSelDance(d);setTab("syllabus");}, `${d.name} syllabus`)}
                             style={{minWidth:110,borderRadius:16,padding:"16px 12px",textAlign:"center",background:`linear-gradient(145deg,${d.color}bb,${d.color}44)`,border:"1px solid var(--bdr)",animation:`si .4s ease ${i*.07}s both`,flexShrink:0}}>
@@ -998,7 +899,7 @@ export default function App() {
                   {["All","Smooth","Rhythm"].map(f=><Pill key={f} active={styleFilter===f} onClick={()=>setStyleFilter(f)}>{f}</Pill>)}
                 </div>
                 {ALL_DANCES.filter(d=>styleFilter==="All"||d.style.includes(styleFilter)).map((d,i)=>{
-                  const pct = dancePct(d);
+                  const pct = dancePct(d, prog);
                   return(
                     <div key={d.id} className="card gl" {...clickable(()=>setSelDance(d), `${d.name} — ${pct}% complete`)}
                       style={{padding:14,marginBottom:8,display:"flex",gap:12,alignItems:"center",animation:`fu .35s ease ${i*.05}s both`,borderLeft:`3px solid ${d.color}`}}>
@@ -1473,7 +1374,7 @@ export default function App() {
                 {/* Per-dance progress */}
                 <div style={{fontSize:14,fontWeight:600,marginBottom:10,fontFamily:"var(--serif)"}}>Syllabus Progress</div>
                 {ALL_DANCES.map(d=>{
-                  const pct = dancePct(d);
+                  const pct = dancePct(d, prog);
                   return(
                     <div key={d.id} style={{marginBottom:8,display:"flex",alignItems:"center",gap:10}}>
                       <span style={{fontSize:18,flexShrink:0}}>{d.emoji}</span>
@@ -1504,6 +1405,20 @@ export default function App() {
                       </div>
                     );
                   })}
+                </div>
+              </Row>
+              {/* Data — backup / restore / reset (localStorage is the only store) */}
+              <Row>
+                <div style={{fontSize:14,fontWeight:600,marginBottom:10,fontFamily:"var(--serif)"}}>Your Data</div>
+                <div className="gl" style={{borderRadius:14,padding:14}}>
+                  <div style={{fontSize:11,color:"var(--txt3)",lineHeight:1.6,marginBottom:12}}>
+                    Progress is stored on this device. Export a backup to keep it safe or move to another device.
+                  </div>
+                  <div style={{display:"flex",gap:8,flexWrap:"wrap"}}>
+                    <button className="btn" onClick={exportData} style={{flex:1,minWidth:120,padding:"10px",background:"rgba(201,168,76,.1)",border:"1px solid rgba(201,168,76,.2)",color:"var(--gold)",fontSize:12,fontWeight:600}}>⬇ Export backup</button>
+                    <button className="btn" onClick={()=>importRef.current?.click()} style={{flex:1,minWidth:120,padding:"10px",background:"var(--s1)",border:"1px solid var(--bdr)",color:"var(--txt2)",fontSize:12,fontWeight:600}}>⬆ Import backup</button>
+                  </div>
+                  <button className="btn" onClick={resetData} style={{width:"100%",marginTop:8,padding:"9px",background:"rgba(207,107,107,.08)",border:"1px solid rgba(207,107,107,.18)",color:"var(--red)",fontSize:12}}>Reset all progress</button>
                 </div>
               </Row>
             </div>
