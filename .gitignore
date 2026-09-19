@@ -20,3 +20,7 @@ dev-dist/
 DanceV2/
 DanceV4/
 dancecoach-live/
+.env.*.local
+.env.production
+*.pem
+.runtime-secrets.json
